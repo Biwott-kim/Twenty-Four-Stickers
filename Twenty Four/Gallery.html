@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sticker Gallery | Twenty Four Sticker Shop</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #ff2f92;
+      --secondary: #00e5ff;
+      --card: rgba(255,255,255,0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top, #1b1b3a, #05050a); color: #fff; }
+
+    header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: rgba(10,10,25,0.8); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 10; }
+    header strong { font-size: 1.2rem; }
+    nav a { margin-left: 18px; text-decoration: none; color: #eee; font-weight: 500; }
+
+    .filters { display: flex; justify-content: center; gap: 16px; padding: 24px; flex-wrap: wrap; }
+    .filter-btn { background: var(--card); border: none; padding: 10px 18px; border-radius: 20px; cursor: pointer; color: #fff; transition: 0.3s; }
+    .filter-btn:hover, .filter-btn.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #000; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; padding: 24px; }
+    .card { background: var(--card); border-radius: 18px; padding: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; }
+    .card:hover { transform: rotate(-3deg) scale(1.05); box-shadow: 0 0 25px rgba(0,229,255,0.6); }
+    .card img { width: 100%; border-radius: 12px; margin-bottom: 12px; }
+    .card .price { font-weight: 700; color: var(--secondary); margin: 6px 0 12px; }
+    .card button { width: 100%; padding: 10px; border-radius: 25px; border: none; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #000; font-weight: 700; cursor: pointer; transition: transform 0.2s; }
+    .card button:hover { transform: scale(1.05); }
+
+    .cart-bubble { position: fixed; bottom: 20px; right: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); padding: 12px 18px; border-radius: 30px; font-weight: 700; cursor: pointer; box-shadow: 0 0 25px rgba(255,47,146,0.6); transition: transform 0.3s; }
+    .cart-bubble.pulse { animation: pulse 0.5s ease-in-out; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+    #toast { position: fixed; bottom: 80px; right: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); padding: 12px 18px; border-radius: 25px; color: #000; font-weight: 700; opacity: 0; pointer-events: none; transition: opacity 0.5s ease, transform 0.5s ease; }
+    #toast.show { opacity: 1; transform: translateY(-10px); }
+
+    footer { padding: 24px; text-align: center; font-size: 0.9rem; color: #aaa; }
+  </style>
+</head>
+<body>
+
+<header>
+  <strong>Twenty Four</strong>
+  <nav>
+    <a href="Homepage.html">Home</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="cart.html">Cart 🛒</a>
+  </nav>
+</header>
+
+<section class="filters">
+  <button class="filter-btn active" data-category="all">All</button>
+  <button class="filter-btn" data-category="anime">Anime</button>
+  <button class="filter-btn" data-category="sporty">Sporty</button>
+  <button class="filter-btn" data-category="girly">Girly</button>
+  <button class="filter-btn" data-category="gangster">Gangster</button>
+</section>
+
+<section class="grid" id="sticker-grid"></section>
+
+<div class="cart-bubble" onclick="checkout()">Cart: <span id="cart-count">0</span></div>
+<div id="toast">Sticker added!</div>
+
+<footer>
+  © 2026 Twenty Four Sticker Shop • Mount Kenya University
+</footer>
+
+<script>
+  let stickers = [];
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+  const grid = document.getElementById('sticker-grid');
+  const cartCount = document.getElementById('cart-count');
+  const cartBubble = document.querySelector('.cart-bubble');
+  const toast = document.getElementById('toast');
+
+  function updateCartCount() { cartCount.textContent = cart.length; }
+  updateCartCount();
+
+  fetch('stickers.json')
+    .then(res => res.json())
+    .then(data => {
+      stickers = data;
+      displayStickers('all');
+    });
+
+  function displayStickers(category) {
+    grid.innerHTML = '';
+    let filtered = category === 'all' ? stickers : stickers.filter(s => s.category === category);
+    filtered.forEach(sticker => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${sticker.img}" alt="${sticker.name}">
+        <h3>${sticker.name}</h3>
+        <p class="price">KES 20</p>
+        <button onclick="addToCart('${sticker.id}','${sticker.name}',20)">Select</button>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      displayStickers(btn.dataset.category);
+    });
+  });
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  function addToCart(id, name, price) {
+    cart.push({id,name,price});
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    cartBubble.classList.add('pulse');
+    setTimeout(() => cartBubble.classList.remove('pulse'), 500);
+    showToast(`${name} added to cart!`);
+  }
+
+  function checkout() {
+    if (cart.length === 0) return showToast("Your cart is empty!");
+    let message = `Order from Twenty Four Sticker Shop\nCampus: Mount Kenya University\n\nItems:\n`;
+    cart.forEach(item => { message += `- ${item.name}\n`; });
+    message += `\nTotal: KES ${cart.length * 20}\nDelivery: Free campus meet-up\nPayment: Pay on delivery`;
+    let url = `https://wa.me/254726156511?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  }
+</script>
+
+</body>
+</html>
+

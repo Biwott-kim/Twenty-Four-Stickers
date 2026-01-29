@@ -1,0 +1,19 @@
+backend:
+  name: git-gateway
+  branch: main   
+
+media_folder: "images/stickers"    # where uploaded images are stored
+public_folder: "/images/stickers"  # path used in HTML/JSON
+
+collections:
+  - name: "stickers"
+    label: "Stickers"
+    folder: "images/stickers"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Sticker Name", name: "name", widget: "string" }
+      - { label: "Category", name: "category", widget: "select", options: ["anime","sporty","girly","gangster"] }
+      - { label: "Image", name: "img", widget: "image", required: true }
+      - { label: "ID", name: "id", widget: "uuid" }
+

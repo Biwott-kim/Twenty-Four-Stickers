@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twenty Four Sticker Shop</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #ff2f92;
+      --secondary: #00e5ff;
+      --card: rgba(255,255,255,0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top, #1b1b3a, #05050a); color: #fff; }
+
+    header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: rgba(10,10,25,0.8); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 10; }
+    header strong { font-size: 1.2rem; }
+    nav a { margin-left: 18px; text-decoration: none; color: #eee; font-weight: 500; }
+
+    .hero { padding: 60px 24px; text-align: center; }
+    .hero h1 { font-size: 2.6rem; margin-bottom: 12px; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.1rem; color: #d7d7ff; margin-bottom: 24px; }
+    .cta { display: inline-block; padding: 14px 36px; border-radius: 40px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #000; font-weight: 700; text-decoration: none; box-shadow: 0 0 35px rgba(255,47,146,0.6); }
+
+    .categories { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 20px; padding: 40px 24px; }
+    .category-card { background: var(--card); padding: 24px; border-radius: 16px; text-align: center; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .category-card:hover { transform: translateY(-6px) scale(1.04); box-shadow: 0 0 30px rgba(0,229,255,0.5); }
+
+    .category-card h3 { margin: 0; color: var(--secondary); }
+
+    .featured { padding: 40px 24px; }
+    .featured h2 { text-align: center; margin-bottom: 24px; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; }
+
+    .card { background: var(--card); border-radius: 18px; padding: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; }
+    .card:hover { transform: translateY(-6px) scale(1.04); box-shadow: 0 0 30px rgba(255,47,146,0.4); }
+    .card img { width: 100%; border-radius: 12px; margin-bottom: 12px; }
+    .card .price { font-weight: 700; color: var(--secondary); margin: 6px 0 12px; }
+    .card button { width: 100%; padding: 10px; border-radius: 25px; border: none; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #000; font-weight: 700; cursor: pointer; }
+
+    footer { padding: 24px; text-align: center; font-size: 0.9rem; color: #aaa; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <img src="sticker logo.png" alt="Twenty Four Sticker Shop logo" height="42">
+    <strong>Twenty Four</strong>
+  </div>
+  <nav>
+    <a href="Homepage.html">Home</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="cart.html">Cart 🛒</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Make your inner child happy 😄✨</h1>
+  <p>Fun graffiti stickers for Mount Kenya University students • KES 20 each • Free campus delivery</p>
+  <a class="cta" href="gallery.html">Browse Stickers</a>
+</section>
+
+<section class="categories">
+  <div class="category-card" onclick="window.location='gallery.html?category=anime'">
+    <h3>Anime</h3>
+  </div>
+  <div class="category-card" onclick="window.location='gallery.html?category=sporty'">
+    <h3>Sporty</h3>
+  </div>
+  <div class="category-card" onclick="window.location='gallery.html?category=girly'">
+    <h3>Girly</h3>
+  </div>
+  <div class="category-card" onclick="window.location='gallery.html?category=gangster'">
+    <h3>Gangster</h3>
+  </div>
+</section>
+
+<section class="featured">
+  <h2>Featured Stickers</h2>
+  <div class="grid" id="featured-stickers"></div>
+</section>
+
+<footer>
+  © 2026 Twenty Four Sticker Shop • Mount Kenya University
+</footer>
+
+<script>
+  // Example: Fetch stickers JSON from Decap CMS (auto-update)
+  fetch('stickers.json') // This JSON is maintained by Decap CMS
+    .then(res => res.json())
+    .then(data => {
+      const grid = document.getElementById('featured-stickers');
+      grid.innerHTML = '';
+      // Shuffle array and pick 6 random stickers
+      const shuffled = data.sort(() => 0.5 - Math.random()).slice(0,6);
+      shuffled.forEach(sticker => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${sticker.img}" alt="${sticker.name}">
+          <h3>${sticker.name}</h3>
+          <p class="price">KES 20</p>
+          <button onclick="addToCart('${sticker.id}', '${sticker.name}', 20)">Select</button>
+        `;
+        grid.appendChild(card);
+      });
+    });
+
+  // Cart functionality
+  function addToCart(id, name, price) {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    cart.push({id,name,price});
+    localStorage.setItem('cart', JSON.stringify(cart));
+    // Show bubble animation
+    alert(`${name} added to cart!`);
+  }
+</script>
+
+</body>
+</html>
+
